@@ -2,10 +2,18 @@ namespace GroupChatServerWorking
 {
     public partial class Form1 : Form
     {
+        NetworkOps ops;
+        Object logBoxlock;
+        Task NetworkTask;
+        CancellationToken cancellationToken;
+        CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
             InitializeComponent();
             KeyBox.PasswordChar = '*';
+            logBoxlock = new Object();
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
 
         }
 
@@ -21,7 +29,8 @@ namespace GroupChatServerWorking
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text,textBox2,logBoxlock);
+            NetworkTask = Task.Run(() => { ops.Run(cancellationToken); });
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -46,6 +55,19 @@ namespace GroupChatServerWorking
         {
             // clears log
             textBox2.Clear();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                cancellationTokenSource.Cancel();
+                ops.CloseConnection();
+            }
+            catch (Exception ex)
+            {
+                textBox2.Text = ex.Message;
+            }
         }
     }
 }

@@ -370,6 +370,7 @@
             button4.TabIndex = 2;
             button4.Text = "Disconnect all";
             button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
             // 
             // button2
             // 
@@ -662,7 +663,6 @@
         private TableLayoutPanel tableLayoutPanel3;
         private Button button1;
         private TextBox textBox1;
-        private TextBox textBox2;
         private Panel panel1;
         private Button button3;
         private Button button2;
@@ -705,5 +705,6 @@
         private Button button6;
         private Button button7;
         private Button button8;
+        public TextBox textBox2;
     }
 }
