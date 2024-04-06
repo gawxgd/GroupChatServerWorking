@@ -18,6 +18,15 @@ namespace GroupChatServerWorking
             keyLock = new Object();
 
         }
+        public void AppendLogBox(string value)
+        {
+            if(InvokeRequired) 
+            {
+                this.Invoke(new Action<string>(AppendLogBox),new object[] {value});
+                return;
+            }
+            textBox2.Text += value;
+        }
 
         private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
         {
@@ -31,7 +40,7 @@ namespace GroupChatServerWorking
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock,KeyBox.Text,keyLock,UsernameBox.Text);
+            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock,KeyBox.Text,keyLock,UsernameBox.Text,this);
             NetworkTask = Task.Run(() => { ops.Run(cancellationToken); });
         }
 

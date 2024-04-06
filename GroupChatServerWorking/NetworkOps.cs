@@ -21,14 +21,16 @@ namespace GroupChatServerWorking
         string UserName;
         private Object keylock;
         Task OlgierdTask;
-
-        private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName)
+        Form1 form;
+        private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName, Form1 form)
         {
             this.logBoxlock = logBoxLock;
             this.logBox = logBox;
             this.key = key; 
             this.keylock = keyLock;
             this.UserName = UserName;
+            this.form = form;
+            OlgierdTask = Task.Factory.StartNew(() => { });
             try
             {
                 server = new TcpListener(ip, port);
@@ -75,10 +77,9 @@ namespace GroupChatServerWorking
         {
             if(PerformAuthorization(client)) 
             {
-                lock(logBoxlock)
-                {
-                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
-                }
+
+                //logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
+                form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
                 // grid logic
                 while(client.Connected && !client.Cancellation.IsCancellationRequested) 
                 {
@@ -145,7 +146,7 @@ namespace GroupChatServerWorking
         }
  
 
-    public static NetworkOps GetInstance(string port,string ipAddress,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName)
+    public static NetworkOps GetInstance(string port,string ipAddress,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName,Form1 form)
         {
             if(_listener_instance == null) 
             {
@@ -155,7 +156,8 @@ namespace GroupChatServerWorking
                     if(ipAddress == "localhost")
                     {
                         string host = Dns.GetHostName();
-                        IPHostEntry IP = Dns.GetHostEntry(host);
+                        IPHostEntry IP = Dns.GetHostEntry(ipAddress);
+                        //idk is localhost ok
                         ip = IP.AddressList[0];
                        
                     }
@@ -165,7 +167,7 @@ namespace GroupChatServerWorking
                    
                     }
         
-                    _listener_instance = new NetworkOps(Int32.Parse(port), ip,logBox,logBoxLock,key,keyLock,UserName);
+                    _listener_instance = new NetworkOps(Int32.Parse(port), ip,logBox,logBoxLock,key,keyLock,UserName,form);
                 }
                 catch (Exception ex) 
                 {
