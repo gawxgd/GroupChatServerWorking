@@ -257,6 +257,7 @@
             KeyBox.Size = new Size(62, 23);
             KeyBox.TabIndex = 7;
             KeyBox.TextAlign = HorizontalAlignment.Center;
+            KeyBox.TextChanged += KeyBox_TextChanged;
             // 
             // UsernameBox
             // 
@@ -358,6 +359,7 @@
             button3.TabIndex = 1;
             button3.Text = "Clear";
             button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
             // button4
             // 
