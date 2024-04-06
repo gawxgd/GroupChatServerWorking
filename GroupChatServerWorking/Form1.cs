@@ -2,9 +2,11 @@ namespace GroupChatServerWorking
 {
     public partial class Form1 : Form
     {
+        bool keyBoxShow;
         public Form1()
         {
             InitializeComponent();
+            keyBoxShow = false;
         }
 
         private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
