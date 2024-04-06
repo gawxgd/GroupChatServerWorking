@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,10 +17,18 @@ namespace GroupChatServerWorking
         private TcpListener server = null;
         private Object logBoxlock;
         private TextBox logBox;
-        private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock)
+        string key;
+        string UserName;
+        private Object keylock;
+        Task OlgierdTask;
+
+        private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName)
         {
             this.logBoxlock = logBoxLock;
             this.logBox = logBox;
+            this.key = key; 
+            this.keylock = keyLock;
+            this.UserName = UserName;
             try
             {
                 server = new TcpListener(ip, port);
@@ -34,54 +45,107 @@ namespace GroupChatServerWorking
             }
 
         }
-        public void Run(CancellationToken token)
+        public async void Run(CancellationToken token)
         {
+            List<Task> Clienttasks = new List<Task>();
             while(!token.IsCancellationRequested) 
             {
-                TcpClient client = server.AcceptTcpClient();
-                lock(logBoxlock) 
+                try
                 {
-                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | New client... Authorizing {Environment.NewLine}");
+                    
+                    ConnectionClient client = new ConnectionClient(await server.AcceptTcpClientAsync(token));
+                    Clienttasks.Add(Task.Run((Action)(() => Connection(client))));
+                    lock (logBoxlock)
+                    {
+                        logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | New client... Authorizing {Environment.NewLine}");
+                    }
+                }catch (Exception ex) 
+                {
+                    
                 }
-                // perform authorization
 
             }
+            server.Stop();
+            lock (logBoxlock)
+            {
+                logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Shutting connection {Environment.NewLine}");
+            }
         }
-    //    static bool PerformAuthorization(TcpClient client)
-    //    {
-            
+        private async void Connection(ConnectionClient client)
+        {
+            if(PerformAuthorization(client)) 
+            {
+                lock(logBoxlock)
+                {
+                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
+                }
+                // grid logic
+                while(client.Connected && !client.Cancellation.IsCancellationRequested) 
+                {
+                    try
+                    {
+                     //recive messages    
+                    }
+                    catch (Exception ex) 
+                    {
+                    }
+                }
+            }
+        }
+        private bool PerformAuthorization(ConnectionClient client) 
+        {
+            try
+            {
+                string NetMessage = ((TextReader)client.Reader).ReadLine();
+                if (NetMessage is null)
+                    return false;
+                Messages.Authorization auth = SerialOps.DeserializeFromJsonAuth(NetMessage);
+                if (auth is null)
+                    return false;
+                client.Name = auth.Sender;
+                // idk jak zblokowoać
+                if(auth.Key == key)
+                {
+                    AsyncOlgierd(new Messages.Message(UserName, "Authorized", DateTime.Now), client);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex) 
+            {
+                lock(logBoxlock) 
+                {
+                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Auth Errror {Environment.NewLine}");
+                    return false;
+                }
+            }
+        }
+        private void SendMesagePackage(Messages.Message message, ConnectionClient client)
+        {
+            try
+            {
+                string og_olgierd = SerialOps.SerializeToJson(message);
+                ((TextWriter)client.Writer).WriteLine(og_olgierd);
+                ((TextWriter)client.Writer).Flush();
+            }
+            catch(Exception ex)
+            {
+                lock(logBoxlock)
+                {
+                    logBox.AppendText(ex.Message);
+                }
+            }
+        }
+        private async Task AsyncOlgierd(Messages.Message message, ConnectionClient client)
+        {
+            await OlgierdTask.ContinueWith((Action<Task>)(task => SendMesagePackage(message, client)));
+        }
+ 
 
-    //        try
-    //        {
-    //            // Odbieranie danych od klienta
-    //            NetworkStream stream = client.GetStream();
-    //            byte[] buffer = new byte[1024];
-    //            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-    //            string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-
-    //            // Sprawdzenie czy odebrana wiadomość to Messages.Authorization
-    //            if (message == Messages.Authorization)
-    //            {
-    //                // Tutaj możesz umieścić logikę autoryzacji, np. porównanie kluczy
-
-    //                // W przypadku sukcesu zwróć true
-    //                return true;
-    //            }
-    //            else
-    //            {
-    //                // W przypadku niezgodności kluczy zwróć false
-    //                return false;
-    //            }
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            Console.WriteLine($"An error occurred during authorization: {ex.Message}");
-    //            return false;
-    //        }
-    //    }
-    //}
-
-    public static NetworkOps GetInstance(string port,string ipAddress,TextBox logBox,Object logBoxLock)
+    public static NetworkOps GetInstance(string port,string ipAddress,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName)
         {
             if(_listener_instance == null) 
             {
@@ -101,7 +165,7 @@ namespace GroupChatServerWorking
                    
                     }
         
-                    _listener_instance = new NetworkOps(Int32.Parse(port), ip,logBox,logBoxLock);
+                    _listener_instance = new NetworkOps(Int32.Parse(port), ip,logBox,logBoxLock,key,keyLock,UserName);
                 }
                 catch (Exception ex) 
                 {

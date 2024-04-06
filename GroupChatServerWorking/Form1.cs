@@ -7,6 +7,7 @@ namespace GroupChatServerWorking
         Task NetworkTask;
         CancellationToken cancellationToken;
         CancellationTokenSource cancellationTokenSource;
+        Object keyLock;
         public Form1()
         {
             InitializeComponent();
@@ -14,6 +15,7 @@ namespace GroupChatServerWorking
             logBoxlock = new Object();
             cancellationTokenSource = new CancellationTokenSource();
             cancellationToken = cancellationTokenSource.Token;
+            keyLock = new Object();
 
         }
 
@@ -29,7 +31,7 @@ namespace GroupChatServerWorking
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text,textBox2,logBoxlock);
+            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock,KeyBox.Text,keyLock,UsernameBox.Text);
             NetworkTask = Task.Run(() => { ops.Run(cancellationToken); });
         }
 
@@ -61,13 +63,25 @@ namespace GroupChatServerWorking
         {
             try
             {
-                cancellationTokenSource.Cancel();
+                if (cancellationToken.CanBeCanceled)
+                {
+                    cancellationTokenSource.Cancel();
+                }
+                else
+                {
+                    MessageBox.Show("unable to cancel thread");
+                }
                 ops.CloseConnection();
             }
             catch (Exception ex)
             {
                 textBox2.Text = ex.Message;
             }
+        }
+
+        private void UsernameBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

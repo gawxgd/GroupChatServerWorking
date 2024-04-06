@@ -7,25 +7,25 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 namespace GroupChatServerWorking
 {
-    public class SerialOps
+    public static class SerialOps
     {
-        public string SerializeToJson(Authorization auth)
+        public static string SerializeToJson(Messages.Message auth)
         {
             return JsonConvert.SerializeObject(auth);
         }
-        public string SerializeToJson(Message auth)
+        public static string SerializeToJson(Messages.Authorization auth)
         {
             return JsonConvert.SerializeObject(auth);
         }
 
         // Deserialize JSON to object
-        public static Authorization DeserializeFromJsonAuth(string json)
+        public static Messages.Authorization DeserializeFromJsonAuth(string json)
         {
-            return JsonConvert.DeserializeObject<Authorization>(json);
+            return JsonConvert.DeserializeObject<Messages.Authorization>(json);
         }
-        public static Message DeserializeFromJsonMes(string json)
+        public static Messages.Message DeserializeFromJsonMes(string json)
         {
-            return JsonConvert.DeserializeObject<Message>(json);
+            return JsonConvert.DeserializeObject<Messages.Message>(json);
         }
     }
 }

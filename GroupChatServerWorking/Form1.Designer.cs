@@ -267,6 +267,7 @@
             UsernameBox.TabIndex = 6;
             UsernameBox.Text = "Server";
             UsernameBox.TextAlign = HorizontalAlignment.Center;
+            UsernameBox.TextChanged += UsernameBox_TextChanged;
             // 
             // label2
             // 
