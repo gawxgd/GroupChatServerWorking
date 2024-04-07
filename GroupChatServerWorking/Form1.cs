@@ -133,6 +133,7 @@ namespace GroupChatServerWorking
                     client.TcpClient.Close();
                     ops.connections.Remove(client);
                     AppendLogBox($"disconnected {client.Name}");
+                    dataGridView1.Rows.RemoveAt(e.RowIndex);
                 }
             }
         }
