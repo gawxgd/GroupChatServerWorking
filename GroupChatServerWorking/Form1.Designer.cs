@@ -32,7 +32,7 @@
             dataGridView1 = new DataGridView();
             IDh = new DataGridViewTextBoxColumn();
             Nameh = new DataGridViewTextBoxColumn();
-            Disconnecth = new DataGridViewTextBoxColumn();
+            Disconnecth = new DataGridViewButtonColumn();
             tableLayoutPanel2 = new TableLayoutPanel();
             tableLayoutPanel3 = new TableLayoutPanel();
             button1 = new Button();
@@ -123,6 +123,7 @@
             dataGridView1.RowTemplate.Height = 25;
             dataGridView1.Size = new Size(394, 444);
             dataGridView1.TabIndex = 1;
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
             // IDh
             // 
@@ -138,6 +139,8 @@
             // 
             Disconnecth.HeaderText = "Disconnect";
             Disconnecth.Name = "Disconnecth";
+            Disconnecth.Resizable = DataGridViewTriState.True;
+            Disconnecth.SortMode = DataGridViewColumnSortMode.Automatic;
             // 
             // tableLayoutPanel2
             // 
@@ -683,10 +686,6 @@
         private Label label5;
         private TextBox AddressBox;
         private TextBox PortBox;
-        private DataGridView dataGridView1;
-        private DataGridViewTextBoxColumn IDh;
-        private DataGridViewTextBoxColumn Nameh;
-        private DataGridViewTextBoxColumn Disconnecth;
         private TableLayoutPanel tableLayoutPanel6;
         private TableLayoutPanel tableLayoutPanel7;
         private TableLayoutPanel tableLayoutPanel8;
@@ -710,5 +709,9 @@
         private Button button7;
         private Button button8;
         public TextBox textBox2;
+        public DataGridView dataGridView1;
+        private DataGridViewTextBoxColumn IDh;
+        private DataGridViewTextBoxColumn Nameh;
+        private DataGridViewButtonColumn Disconnecth;
     }
 }

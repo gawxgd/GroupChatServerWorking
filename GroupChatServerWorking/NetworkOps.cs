@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace GroupChatServerWorking
 {
@@ -22,7 +23,8 @@ namespace GroupChatServerWorking
         private Object keylock;
         Task OlgierdTask;
         Form1 form;
-        List<ConnectionClient> connections;
+        public List<ConnectionClient> connections;
+        int row = 0;
         private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName, Form1 form)
         {
             this.logBoxlock = logBoxLock;
@@ -90,7 +92,9 @@ namespace GroupChatServerWorking
                             Messages.Message recived = SerialOps.DeserializeFromJsonMes(RecivedMessage);
                             if(recived.Text == "Disconnected")
                             {
+                                client.TcpClient.Close();
                                 connections.Remove(client);
+                                continue;
                             }
                             form.AppendLogBox($"{recived.Time.ToString("HH:mm")} | Recived {recived.Text} From {recived.Sender} {Environment.NewLine}");
                             foreach(var cl in connections)
@@ -125,7 +129,11 @@ namespace GroupChatServerWorking
                 {
                     AsyncOlgierd(new Messages.Message(UserName, "Authorized", DateTime.Now), client);
                     form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} Authorized {client.Name} {Environment.NewLine}");
-
+                    form.Invoke(new Action(() => form.dataGridView1.Rows.Add(client.Id, client.Name)));
+                    var disconnectButton = new DataGridViewButtonCell();
+                    disconnectButton.Value = "Disconnect";
+                    form.Invoke(new Action(() => form.dataGridView1.Rows[row].Cells["Disconnecth"] = disconnectButton));
+                    row++;
                     return true;
                 }
                 else
@@ -206,6 +214,13 @@ namespace GroupChatServerWorking
         {
             if(server != null)
             {
+                foreach(var client in connections)
+                {
+                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Disconnecting client {client.Name} {Environment.NewLine}");
+                    client.TcpClient.Close();
+                }
+                form.Invoke(new Action(() => form.dataGridView1.Rows.Clear()));
+                connections.Clear();
                 server.Stop();
                 _listener_instance = null;
                 lock(logBoxlock)

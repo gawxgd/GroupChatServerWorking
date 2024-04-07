@@ -1,3 +1,5 @@
+using System.Windows.Forms;
+
 namespace GroupChatServerWorking
 {
     public partial class Form1 : Form
@@ -16,6 +18,8 @@ namespace GroupChatServerWorking
             cancellationTokenSource = new CancellationTokenSource();
             cancellationToken = cancellationTokenSource.Token;
             keyLock = new Object();
+            dataGridView1.Rows.Clear();
+
 
         }
         public void AppendLogBox(string value)
@@ -107,9 +111,29 @@ namespace GroupChatServerWorking
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter) 
+            if (e.KeyCode == Keys.Enter)
             {
                 button1_Click(sender, e);
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == dataGridView1.Columns["Disconnecth"].Index && e.RowIndex >= 0)
+            {
+                // Get the client name from the corresponding row
+                var clientID = dataGridView1.Rows[e.RowIndex].Cells["IDh"].Value.ToString();
+
+                // Find the client associated with the clicked row
+                var client = ops.connections.Find(c => c.Id == long.Parse(clientID));
+
+                // If client found, close its connection and remove from the list of connections
+                if (client != null)
+                {
+                    client.TcpClient.Close();
+                    ops.connections.Remove(client);
+                    AppendLogBox($"disconnected {client.Name}");
+                }
             }
         }
     }
