@@ -88,6 +88,10 @@ namespace GroupChatServerWorking
                         if(!(RecivedMessage is null))
                         {
                             Messages.Message recived = SerialOps.DeserializeFromJsonMes(RecivedMessage);
+                            if(recived.Text == "Disconnected")
+                            {
+                                connections.Remove(client);
+                            }
                             form.AppendLogBox($"{recived.Time.ToString("HH:mm")} | Recived {recived.Text} From {recived.Sender} {Environment.NewLine}");
                             foreach(var cl in connections)
                             {
@@ -133,7 +137,7 @@ namespace GroupChatServerWorking
             {
                 lock(logBoxlock) 
                 {
-                    logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Auth Errror {Environment.NewLine}");
+                    form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} | Auth Errror {Environment.NewLine}");
                     return false;
                 }
             }
