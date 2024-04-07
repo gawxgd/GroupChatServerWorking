@@ -20,9 +20,9 @@ namespace GroupChatServerWorking
         }
         public void AppendLogBox(string value)
         {
-            if(InvokeRequired) 
+            if (InvokeRequired)
             {
-                this.Invoke(new Action<string>(AppendLogBox),new object[] {value});
+                this.Invoke(new Action<string>(AppendLogBox), new object[] { value });
                 return;
             }
             textBox2.Text += value;
@@ -40,7 +40,7 @@ namespace GroupChatServerWorking
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock,KeyBox.Text,keyLock,UsernameBox.Text,this);
+            ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock, KeyBox.Text, keyLock, UsernameBox.Text, this);
             NetworkTask = Task.Run(() => { ops.Run(cancellationToken); });
         }
 
@@ -91,6 +91,26 @@ namespace GroupChatServerWorking
         private void UsernameBox_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ops.SendToAll(new Messages.Message(UsernameBox.Text, textBox1.Text, DateTime.Now));
+            textBox1.Clear();
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter) 
+            {
+                button1_Click(sender, e);
+            }
         }
     }
 }

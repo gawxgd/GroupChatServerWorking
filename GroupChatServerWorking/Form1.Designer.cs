@@ -182,6 +182,7 @@
             button1.TabIndex = 0;
             button1.Text = "Send";
             button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // textBox1
             // 
@@ -190,6 +191,8 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(332, 23);
             textBox1.TabIndex = 1;
+            textBox1.TextChanged += textBox1_TextChanged;
+            textBox1.KeyDown += textBox1_KeyDown;
             // 
             // textBox2
             // 

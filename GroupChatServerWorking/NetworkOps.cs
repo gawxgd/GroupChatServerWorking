@@ -22,6 +22,7 @@ namespace GroupChatServerWorking
         private Object keylock;
         Task OlgierdTask;
         Form1 form;
+        List<ConnectionClient> connections;
         private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName, Form1 form)
         {
             this.logBoxlock = logBoxLock;
@@ -30,6 +31,7 @@ namespace GroupChatServerWorking
             this.keylock = keyLock;
             this.UserName = UserName;
             this.form = form;
+            connections = new List<ConnectionClient>();
             OlgierdTask = Task.Factory.StartNew(() => { });
             try
             {
@@ -77,7 +79,7 @@ namespace GroupChatServerWorking
         {
             if(PerformAuthorization(client)) 
             {
-
+                connections.Add(client);
                 //logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
                 form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} Has Connected {client.Name} {Environment.NewLine}");
                 // grid logic
@@ -108,6 +110,8 @@ namespace GroupChatServerWorking
                 if(auth.Key == key)
                 {
                     AsyncOlgierd(new Messages.Message(UserName, "Authorized", DateTime.Now), client);
+                    form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} Authorized {client.Name} {Environment.NewLine}");
+
                     return true;
                 }
                 else
@@ -134,15 +138,23 @@ namespace GroupChatServerWorking
             }
             catch(Exception ex)
             {
-                lock(logBoxlock)
-                {
-                    logBox.AppendText(ex.Message);
-                }
+                
+                
+                //logBox.AppendText(ex.Message);
+                
             }
         }
         private async Task AsyncOlgierd(Messages.Message message, ConnectionClient client)
         {
             await OlgierdTask.ContinueWith((Action<Task>)(task => SendMesagePackage(message, client)));
+        }
+        public void SendToAll(Messages.Message mes)
+        {
+            foreach(ConnectionClient client in connections)
+            {
+                AsyncOlgierd(mes, client); 
+                logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Send {mes.Text} to {client.Name} {Environment.NewLine}");
+            }
         }
  
 
