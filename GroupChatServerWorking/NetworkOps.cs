@@ -70,10 +70,7 @@ namespace GroupChatServerWorking
 
             }
             server.Stop();
-            lock (logBoxlock)
-            {
-                logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Shutting connection {Environment.NewLine}");
-            }
+            form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} | Shutting connection {Environment.NewLine}");
         }
         private async void Connection(ConnectionClient client)
         {
@@ -87,7 +84,20 @@ namespace GroupChatServerWorking
                 {
                     try
                     {
-                     //recive messages    
+                        string RecivedMessage = ((TextReader)client.Reader).ReadLine();
+                        if(!(RecivedMessage is null))
+                        {
+                            Messages.Message recived = SerialOps.DeserializeFromJsonMes(RecivedMessage);
+                            form.AppendLogBox($"{recived.Time.ToString("HH:mm")} | Recived {recived.Text} From {recived.Sender} {Environment.NewLine}");
+                            foreach(var cl in connections)
+                            {
+                                if(cl.Id != client.Id)
+                                {
+                                    AsyncOlgierd(recived, cl);
+                                    form.AppendLogBox($"{recived.Time.ToString("HH:mm")} | Send {recived.Text} To {cl.Name} {Environment.NewLine}");
+                                }
+                            }
+                        }
                     }
                     catch (Exception ex) 
                     {
