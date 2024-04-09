@@ -24,7 +24,7 @@ namespace GroupChatServerWorking
         Task OlgierdTask;
         Form1 form;
         public List<ConnectionClient> connections;
-        int row = 0;
+        public int row = 0;
         private NetworkOps(Int32 port,IPAddress ip,TextBox logBox,Object logBoxLock,string key,Object keyLock,string UserName, Form1 form)
         {
             this.logBoxlock = logBoxLock;
@@ -71,8 +71,8 @@ namespace GroupChatServerWorking
                 }
 
             }
-            server.Stop();
-            form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} | Shutting connection {Environment.NewLine}");
+            //server.Stop();
+            //form.AppendLogBox($"{DateTime.Now.ToString("HH:mm")} | Shutting connection {Environment.NewLine}");
         }
         private async void Connection(ConnectionClient client)
         {
@@ -166,7 +166,7 @@ namespace GroupChatServerWorking
                 
             }
         }
-        private async Task AsyncOlgierd(Messages.Message message, ConnectionClient client)
+        public async Task AsyncOlgierd(Messages.Message message, ConnectionClient client)
         {
             await OlgierdTask.ContinueWith((Action<Task>)(task => SendMesagePackage(message, client)));
         }
@@ -214,6 +214,7 @@ namespace GroupChatServerWorking
         {
             if(server != null)
             {
+                SendToAll(new Messages.Message(UserName, "disconnected", DateTime.Now));
                 foreach(var client in connections)
                 {
                     logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Disconnecting client {client.Name} {Environment.NewLine}");
@@ -227,6 +228,7 @@ namespace GroupChatServerWorking
                 {
                     logBox.AppendText($"{DateTime.Now.ToString("HH:mm")} | Disconnected {Environment.NewLine}");
                 }
+                server = null;
             }
             else
             {

@@ -15,8 +15,7 @@ namespace GroupChatServerWorking
             InitializeComponent();
             KeyBox.PasswordChar = '*';
             logBoxlock = new Object();
-            cancellationTokenSource = new CancellationTokenSource();
-            cancellationToken = cancellationTokenSource.Token;
+            
             keyLock = new Object();
             dataGridView1.Rows.Clear();
 
@@ -44,6 +43,8 @@ namespace GroupChatServerWorking
 
         private void button2_Click(object sender, EventArgs e)
         {
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
             ops = NetworkOps.GetInstance(PortBox.Text, AddressBox.Text, textBox2, logBoxlock, KeyBox.Text, keyLock, UsernameBox.Text, this);
             NetworkTask = Task.Run(() => { ops.Run(cancellationToken); });
         }
@@ -85,6 +86,7 @@ namespace GroupChatServerWorking
                     MessageBox.Show("unable to cancel thread");
                 }
                 ops.CloseConnection();
+                NetworkTask.Dispose();
             }
             catch (Exception ex)
             {
@@ -130,6 +132,8 @@ namespace GroupChatServerWorking
                 // If client found, close its connection and remove from the list of connections
                 if (client != null)
                 {
+                    ops.row--;
+                    ops.AsyncOlgierd(new Messages.Message(UsernameBox.Text, "disconnected", DateTime.Now),client);
                     client.TcpClient.Close();
                     ops.connections.Remove(client);
                     AppendLogBox($"disconnected {client.Name}");
